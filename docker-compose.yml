@@ -1,13 +1,27 @@
 version: '3.8'
-
 services:
   app:
     build: .
     ports:
       - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
     environment:
       - NODE_ENV=development
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     command: npm run dev
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+    volumes:
+      - ./test-results:/usr/src/app/test-results
