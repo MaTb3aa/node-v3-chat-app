@@ -1,33 +1,55 @@
 pipeline {
     agent any
+    
     environment {
-        // Optional: Set environment variables if needed (e.g., PORT)
         PORT = "3000"
+        DOCKER_IMAGE = "matb3a-chat-app"
     }
+    
     stages {
+        stage('Install Node.js') {
+            steps {
+                // Install Node.js on the Jenkins agent
+                sh '''
+                    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+                    sudo apt-get install -y nodejs
+                    node --version
+                    npm --version
+                '''
+            }
+        }
+        
+        stage('Build Application') {
+            steps {
+                sh '''
+                    npm install
+                    npm run build  # If you have a build step
+                '''
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image from your Dockerfile
-                    docker.build("matb3a-chat-app:latest", "--build-arg NODE_ENV=production .")
+                    docker.build("${DOCKER_IMAGE}:latest", "--build-arg NODE_ENV=production .")
                 }
             }
         }
+        
         stage('Run Container') {
             steps {
                 script {
-                    // Stop and remove any existing container (prevent conflicts)
-                    sh 'docker stop matb3a-chat-app || true'
-                    sh 'docker rm matb3a-chat-app || true'
-                    // Run the container in detached mode, mapping port 3000
-                    sh 'docker run -d --name matb3a-chat-app -p 3000:3000 matb3a-chat-app:latest'
+                    sh "docker stop ${DOCKER_IMAGE} || true"
+                    sh "docker rm ${DOCKER_IMAGE} || true"
+                    sh "docker run -d --name ${DOCKER_IMAGE} -p ${PORT}:${PORT} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
     }
+    
     post {
         success {
-            echo 'Chat app deployed successfully! Access it at http://<JENKINS_IP>:3000'
+            echo "Chat app deployed successfully! Access it at http://${env.JENKINS_IP}:${PORT}"
         }
         failure {
             echo 'Pipeline failed. Check logs for errors.'
