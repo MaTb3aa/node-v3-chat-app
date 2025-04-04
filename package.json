@@ -4,9 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "node src/app.js",
+    "test": "mocha test/**/*.test.js --exit --timeout 10000",
+    "test:ci": "wait-on tcp:app:3000 && npm test",
+    "lint": "eslint ."
   },
+  
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -18,4 +21,5 @@
   "devDependencies": {
     "nodemon": "^2.0.4"
   }
+
 }

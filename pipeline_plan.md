@@ -1,16 +1,19 @@
-# CI/CD Pipeline Plan for Chat App
+# CI/CD Pipeline Plan
 
-## Stages
-1. **Build**
-   - Git checkout
-   - `npm install`
-   - `docker build -t chat-app .`
+1. **Build Stage**:
+   - Build production Docker image
+   - Build test Docker image
 
-2. **Test**
-   - `npm test`
-   - `npm audit` (security check)
-   - `docker scan chat-app` (Docker security scan)
+2. **Test Stage**:
+   - Run unit tests (users.test.js)
+   - Run integration tests (chat.events.test.js)
+   - Run linter
 
-3. **Deploy**
-   - Push to Docker Hub: `docker push yourname/chat-app`
-   - Deploy to server using Ansible playbook.
+3. **Deploy Stage**:
+   - Push to registry if tests pass
+   - Deploy to staging environment
+   - (Optional) Canary deployment to production
+
+4. **Monitoring**:
+   - Health checks
+   - Log aggregation

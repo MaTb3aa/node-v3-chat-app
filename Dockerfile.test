@@ -1,0 +1,13 @@
+FROM node:14-alpine
+
+WORKDIR /usr/src/app
+
+RUN npm install -g wait-on
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["sh", "-c", "wait-on tcp://app:3000 && npm test"]
