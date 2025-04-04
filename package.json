@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js",
+    "start": "node src/index.js",
     "test": "mocha test/**/*.test.js --exit --timeout 10000",
     "test:ci": "wait-on tcp:app:3000 && npm test",
     "lint": "eslint ."

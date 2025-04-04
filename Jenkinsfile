@@ -1,23 +1,36 @@
 pipeline {
     agent any
     environment {
-        PORT = 3000 // Override if needed
+        // Optional: Set environment variables if needed (e.g., PORT)
+        PORT = "3000"
     }
     stages {
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                sh 'npm install'
+                script {
+                    // Build the Docker image from your Dockerfile
+                    docker.build("matb3a-chat-app:latest", "--build-arg NODE_ENV=production .")
+                }
             }
         }
-        stage('Test') {
+        stage('Run Container') {
             steps {
-                sh 'npm test' // Add tests if missing
+                script {
+                    // Stop and remove any existing container (prevent conflicts)
+                    sh 'docker stop matb3a-chat-app || true'
+                    sh 'docker rm matb3a-chat-app || true'
+                    // Run the container in detached mode, mapping port 3000
+                    sh 'docker run -d --name matb3a-chat-app -p 3000:3000 matb3a-chat-app:latest'
+                }
             }
         }
-        stage('Deploy') {
-            steps {
-                sh 'npm start &' // Run in background
-            }
+    }
+    post {
+        success {
+            echo 'Chat app deployed successfully! Access it at http://<JENKINS_IP>:3000'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs for errors.'
         }
     }
 }
